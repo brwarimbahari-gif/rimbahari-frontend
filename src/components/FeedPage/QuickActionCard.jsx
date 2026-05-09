@@ -34,8 +34,19 @@ export default function QuickActionCard() {
           to="/articles/new"
           className="btn-primary text-sm flex items-center justify-center gap-2"
         >
-          <PenLine size={14} />
           Tulis Artikel
+        </Link>
+        <Link
+          to="/opinion/new"
+          className="btn-primary text-sm flex items-center justify-center gap-2"
+        >
+          Tulis Opini Editorial
+        </Link>
+        <Link
+          to="/vignette/new"
+          className="btn-primary text-sm flex items-center justify-center gap-2"
+        >
+          Tulis Vignette
         </Link>
 
       </div>

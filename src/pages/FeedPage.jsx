@@ -12,7 +12,6 @@ const CONTENT_TYPES = [
   { value: 'ARTIKEL',  label: 'Artikel' },
   { value: 'OPINION',  label: 'Opinion' },
   { value: 'VIGNETTE', label: 'Vignette' },
-  { value: 'CERITA',   label: 'Cerita' },
 ]
 
 const typeStyle = {

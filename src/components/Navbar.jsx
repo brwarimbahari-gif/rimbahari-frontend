@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { LogOut, ChevronDown, Menu, X, ShieldCheck, ClipboardList, BookMarked } from 'lucide-react'
+import { LogOut, ChevronDown, Menu, X, ShieldCheck, ClipboardList, BookMarked, Settings } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { authApi, session } from '../lib/api'
 
@@ -171,15 +171,34 @@ export default function Navbar() {
                       >
                         Artikel Saya
                       </Link>
+                      <div className="h-px bg-sand my-1" />
                       {isReviewer && (
-                        <Link
-                          to="/review"
-                          onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm text-ink
-                            hover:bg-sand/50 transition-colors duration-[240ms]"
-                        >
-                          Review Artikel
-                        </Link>
+                        <>
+                          <Link
+                            to="/review"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm text-ink
+                              hover:bg-sand/50 transition-colors duration-[240ms]"
+                          >
+                            Review Artikel
+                          </Link>
+                          <Link
+                            to="/review/opinion"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm text-ink
+                              hover:bg-sand/50 transition-colors duration-[240ms]"
+                          >
+                            Review Opini
+                          </Link>
+                          <Link
+                            to="/review/vignette"
+                            onClick={() => setDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm text-ink
+                              hover:bg-sand/50 transition-colors duration-[240ms]"
+                          >
+                            Review Vignette
+                          </Link>
+                        </>
                       )}
                       {isEtalaseManager && (
                         <Link
@@ -328,15 +347,35 @@ export default function Navbar() {
             >
               Artikel Saya
             </Link>
+            </div>
+            <div className="px-4 py-4 border-b border-sand flex flex-col gap-1">
             {isReviewer && (
-              <Link
-                to="/review"
-                onClick={closeMenu}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-lg font-sans text-sm text-ink
-                  hover:bg-sand/40 transition-colors duration-[240ms]"
-              >
-                Review Artikel
-              </Link>
+              <>
+                <Link
+                  to="/review"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg font-sans text-sm text-ink
+                    hover:bg-sand/40 transition-colors duration-[240ms]"
+                >
+                  Review Artikel
+                </Link>
+                <Link
+                  to="/review/opinion"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg font-sans text-sm text-ink
+                    hover:bg-sand/40 transition-colors duration-[240ms]"
+                >
+                  Review Opini
+                </Link>
+                <Link
+                  to="/review/vignette"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg font-sans text-sm text-ink
+                    hover:bg-sand/40 transition-colors duration-[240ms]"
+                >
+                  Review Vignette
+                </Link>
+              </>
             )}
             {isEtalaseManager && (
               <Link
@@ -358,6 +397,7 @@ export default function Navbar() {
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg font-sans text-sm text-ink
                 hover:bg-sand/40 transition-colors duration-[240ms]"
             >
+              <Settings size={16} className="text-ash flex-shrink-0" />
               Pengaturan
             </Link>
             {isAdmin && (

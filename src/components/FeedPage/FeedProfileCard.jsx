@@ -101,15 +101,35 @@ export default function FeedProfileCard() {
             Artikel Saya
             <FolderOpen size={13} className="text-ash/50 group-hover:text-forest transition-colors duration-[240ms]" />
           </Link>
+          </div>
+          <div className="border-t border-sand pt-3 flex flex-col gap-0.5">
           {isReviewer && (
-            <Link
-              to="/review"
-              className="flex items-center justify-between py-1.5 px-2 rounded-lg font-sans text-sm
-                text-ink hover:bg-sand/40 hover:text-forest transition-all duration-[240ms] group"
-            >
-              Review Artikel
-              <ClipboardList size={13} className="text-ash/50 group-hover:text-forest transition-colors duration-[240ms]" />
-            </Link>
+            <>
+              <Link
+                to="/review"
+                className="flex items-center justify-between py-1.5 px-2 rounded-lg font-sans text-sm
+                  text-ink hover:bg-sand/40 hover:text-forest transition-all duration-[240ms] group"
+              >
+                Review Artikel
+                <ClipboardList size={13} className="text-ash/50 group-hover:text-forest transition-colors duration-[240ms]" />
+              </Link>
+              <Link
+                to="/review/opinion"
+                className="flex items-center justify-between py-1.5 px-2 rounded-lg font-sans text-sm
+                  text-ink hover:bg-sand/40 hover:text-forest transition-all duration-[240ms] group"
+              >
+                Review Opini
+                <ClipboardList size={13} className="text-ash/50 group-hover:text-forest transition-colors duration-[240ms]" />
+              </Link>
+              <Link
+                to="/review/vignette"
+                className="flex items-center justify-between py-1.5 px-2 rounded-lg font-sans text-sm
+                  text-ink hover:bg-sand/40 hover:text-forest transition-all duration-[240ms] group"
+              >
+                Review Vignette
+                <ClipboardList size={13} className="text-ash/50 group-hover:text-forest transition-colors duration-[240ms]" />
+              </Link>
+            </>
           )}
           {isEtalaseManager && (
             <Link
