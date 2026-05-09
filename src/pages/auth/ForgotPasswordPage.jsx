@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Leaf, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, Leaf, Send, CheckCircle, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../../lib/api'
 
@@ -8,6 +8,10 @@ export default function ForgotPasswordPage() {
 
   const [email, setEmail]         = useState('')
   const [code, setCode]           = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [codeSent, setCodeSent]   = useState(false)
   const [sendingCode, setSendingCode] = useState(false)
   const [sendError, setSendError] = useState('')
@@ -27,11 +31,13 @@ export default function ForgotPasswordPage() {
     setTimeout(tick, 1000)
   }
 
+  const passwordsMatch = confirmPassword === '' || newPassword === confirmPassword
+
   const handleSendCode = async () => {
     if (!email.trim() || sendingCode) return
     setSendingCode(true)
     setSendError('')
-    const { ok, data } = await authApi.sendOtp(email.trim())
+    const { ok, data } = await authApi.forgotPassword(email.trim())
     if (ok) {
       setCodeSent(true)
       startCooldown()
@@ -45,7 +51,7 @@ export default function ForgotPasswordPage() {
     if (cooldown > 0 || sendingCode) return
     setSendingCode(true)
     setSendError('')
-    const { ok, data } = await authApi.sendOtp(email.trim())
+    const { ok, data } = await authApi.forgotPassword(email.trim())
     if (ok) startCooldown()
     else setSendError(data?.error ?? data?.detail ?? 'Gagal mengirim ulang kode.')
     setSendingCode(false)
@@ -53,14 +59,26 @@ export default function ForgotPasswordPage() {
 
   const handleVerify = async (e) => {
     e.preventDefault()
-    if (!code.trim()) return
+    if (!code.trim() || !newPassword || !confirmPassword) return
+    if (newPassword !== confirmPassword) {
+      setVerifyError('Konfirmasi kata sandi tidak cocok.')
+      return
+    }
+    if (newPassword.length < 8) {
+      setVerifyError('Kata sandi minimal 8 karakter.')
+      return
+    }
+
     setLoading(true)
     setVerifyError('')
-    const { ok, data } = await authApi.verifyEmail(email.trim(), code.trim())
+    const { ok, data } = await authApi.resetPassword(email.trim(), code.trim(), newPassword, confirmPassword)
     if (ok) {
       setVerified(true)
     } else {
-      setVerifyError(data?.error ?? data?.detail ?? 'Kode tidak valid atau sudah kedaluwarsa.')
+      // Backend error format mapping
+      const errMsg = Array.isArray(data?.errors) ? data.errors[0] : 
+                    (data?.error ?? data?.detail ?? 'Kode OTP salah atau kata sandi tidak memenuhi syarat.')
+      setVerifyError(errMsg)
     }
     setLoading(false)
   }
@@ -115,10 +133,9 @@ export default function ForgotPasswordPage() {
               <div className="w-14 h-14 rounded-full bg-moss/15 flex items-center justify-center mx-auto mb-5">
                 <CheckCircle size={28} className="text-moss" />
               </div>
-              <h1 className="font-serif text-h1 font-semibold text-ink mb-3">Email Terverifikasi</h1>
+              <h1 className="font-serif text-h1 font-semibold text-ink mb-3">Kata Sandi Diperbarui</h1>
               <p className="font-sans text-body text-ash leading-relaxed mb-8">
-                Identitasmu berhasil diverifikasi. Silakan masuk dan ubah kata sandi melalui halaman{' '}
-                <strong className="font-medium text-ink">Pengaturan</strong> setelah login.
+                Kata sandi Anda berhasil diperbarui. Silakan masuk kembali menggunakan kata sandi yang baru.
               </p>
               <button
                 onClick={() => navigate('/login')}
@@ -201,43 +218,107 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {/* OTP input — slides in after code sent */}
-                <div className={`flex flex-col gap-1.5 transition-all duration-[320ms] ${codeSent ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                  <label className="font-sans text-caption uppercase tracking-widest text-ash font-medium">
-                    Kode Verifikasi
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={code}
-                    onChange={e => { setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setVerifyError('') }}
-                    placeholder="_ _ _ _ _ _"
-                    maxLength={6}
-                    className="bg-bone border border-sand rounded-lg px-4 py-4 font-sans text-2xl text-ink
-                      placeholder:text-ash/30 outline-none focus:border-forest focus:ring-2 focus:ring-forest/15
-                      transition-all duration-[240ms] font-tabular tracking-[0.45em] text-center"
-                  />
-                  {verifyError && (
-                    <div className="flex items-start gap-2 mt-1">
-                      <AlertCircle size={13} className="text-clay flex-shrink-0 mt-0.5" />
-                      <p className="font-sans text-caption text-clay">{verifyError}</p>
+                <div className={`flex flex-col gap-5 transition-all duration-[320ms] ${codeSent ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                  
+                  {/* Kata Sandi Baru */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-sans text-caption uppercase tracking-widest text-ash font-medium">
+                      Kata Sandi Baru
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={e => { setNewPassword(e.target.value); setVerifyError('') }}
+                        placeholder="Minimal 8 karakter"
+                        className="w-full bg-bone border border-sand rounded-lg px-4 py-3 pr-12 font-sans text-sm text-ink
+                          placeholder:text-ash/30 outline-none focus:border-forest focus:ring-2 focus:ring-forest/15
+                          transition-all duration-[240ms]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ash hover:text-forest
+                          transition-colors duration-[240ms]"
+                        aria-label="Toggle password visibility"
+                      >
+                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
                     </div>
-                  )}
-                  <div className="flex items-center justify-between mt-0.5">
-                    <p className="font-sans text-caption text-ash/60">Cek folder Spam jika tidak muncul.</p>
-                    <button
-                      type="button"
-                      onClick={handleResend}
-                      disabled={cooldown > 0 || sendingCode}
-                      className="font-sans text-caption text-forest hover:text-clay underline underline-offset-4
-                        transition-colors duration-[240ms] disabled:opacity-50 flex items-center gap-1"
-                    >
-                      {sendingCode
-                        ? <><Loader2 size={11} className="animate-spin" /> Mengirim…</>
-                        : cooldown > 0
-                        ? `Kirim ulang (${cooldown}s)`
-                        : 'Kirim ulang'
-                      }
-                    </button>
+                  </div>
+
+                  {/* Konfirmasi Kata Sandi */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-sans text-caption uppercase tracking-widest text-ash font-medium">
+                      Konfirmasi Kata Sandi
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={e => { setConfirmPassword(e.target.value); setVerifyError('') }}
+                        placeholder="Ulangi kata sandi"
+                        className={`w-full bg-bone border rounded-lg px-4 py-3 pr-12 font-sans text-sm text-ink
+                          placeholder:text-ash/30 outline-none focus:ring-2
+                          transition-all duration-[240ms] ${
+                            !passwordsMatch
+                              ? 'border-clay focus:border-clay focus:ring-clay/15'
+                              : 'border-sand focus:border-forest focus:ring-forest/15'
+                          }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ash hover:text-forest
+                          transition-colors duration-[240ms]"
+                        aria-label="Toggle confirm password visibility"
+                      >
+                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    {!passwordsMatch && (
+                      <p className="font-sans text-caption text-clay mt-0.5">Kata sandi tidak cocok.</p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-sans text-caption uppercase tracking-widest text-ash font-medium">
+                      Kode Verifikasi (OTP)
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={code}
+                      onChange={e => { setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setVerifyError('') }}
+                      placeholder="_ _ _ _ _ _"
+                      maxLength={6}
+                      className="bg-bone border border-sand rounded-lg px-4 py-4 font-sans text-2xl text-ink
+                        placeholder:text-ash/30 outline-none focus:border-forest focus:ring-2 focus:ring-forest/15
+                        transition-all duration-[240ms] font-tabular tracking-[0.45em] text-center"
+                    />
+                    {verifyError && (
+                      <div className="flex items-start gap-2 mt-1">
+                        <AlertCircle size={13} className="text-clay flex-shrink-0 mt-0.5" />
+                        <p className="font-sans text-caption text-clay">{verifyError}</p>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-0.5">
+                      <p className="font-sans text-caption text-ash/60">Cek folder Spam jika tidak muncul.</p>
+                      <button
+                        type="button"
+                        onClick={handleResend}
+                        disabled={cooldown > 0 || sendingCode}
+                        className="font-sans text-caption text-forest hover:text-clay underline underline-offset-4
+                          transition-colors duration-[240ms] disabled:opacity-50 flex items-center gap-1"
+                      >
+                        {sendingCode
+                          ? <><Loader2 size={11} className="animate-spin" /> Mengirim…</>
+                          : cooldown > 0
+                          ? `Kirim ulang (${cooldown}s)`
+                          : 'Kirim ulang'
+                        }
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -245,13 +326,13 @@ export default function ForgotPasswordPage() {
                 <button
                   type="button"
                   onClick={handleVerify}
-                  disabled={!codeSent || code.length !== 6 || loading}
+                  disabled={!codeSent || code.length !== 6 || !newPassword || !confirmPassword || !passwordsMatch || loading}
                   className="btn-primary flex items-center justify-center gap-2 mt-2
                     disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-forest disabled:active:scale-100"
                 >
                   {loading
-                    ? <><Loader2 size={15} className="animate-spin" /> Memverifikasi…</>
-                    : 'Verifikasi & Lanjutkan'
+                    ? <><Loader2 size={15} className="animate-spin" /> Menyimpan Kata Sandi…</>
+                    : 'Simpan Kata Sandi Baru'
                   }
                 </button>
               </div>
