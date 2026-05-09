@@ -32,12 +32,10 @@ export const session = {
   },
 }
 
-// Redirect to /login and clear session on expired token
+// Notify UI and clear session on expired token
 function _handleExpired() {
   session.clear()
-  if (!window.location.pathname.startsWith('/login')) {
-    window.location.href = '/login'
-  }
+  window.dispatchEvent(new CustomEvent('auth-expired'))
 }
 
 // For multipart/form-data (file uploads) — no Content-Type header, browser sets it with boundary
@@ -101,6 +99,18 @@ export const authApi = {
 
   resendOtp: () =>
     _authRequest('/api/auth/resend-otp/', { method: 'POST' }),
+
+  forgotPassword: (email) =>
+    _request('/api/auth/forgot-password/', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: (email, code, new_password, new_password_confirm) =>
+    _request('/api/auth/reset-password/', {
+      method: 'POST',
+      body: JSON.stringify({ email, code, new_password, new_password_confirm }),
+    }),
 }
 
 // ---------------------------------------------------------------------------
