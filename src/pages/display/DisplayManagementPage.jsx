@@ -9,7 +9,6 @@ const CATEGORIES = {
   EZINE_KEHATI:      { label: 'E-zine Kehati',        bg: 'bg-forest/10', text: 'text-forest', border: 'border-forest/20', icon: BookOpen },
   EZINE_ETNOGRAFI:   { label: 'Etnografi Multimedia', bg: 'bg-moss/10',   text: 'text-moss',   border: 'border-moss/20',   icon: Compass  },
   LAPORAN:           { label: 'Laporan Program',      bg: 'bg-clay/10',   text: 'text-clay',   border: 'border-clay/20',   icon: FileText },
-  OPINION_EDITORIAL: { label: 'Opinion Editorial',    bg: 'bg-sienna/10', text: 'text-sienna', border: 'border-sienna/20', icon: Star     },
   LAINNYA:           { label: 'Lainnya',              bg: 'bg-sand',      text: 'text-ash',    border: 'border-sand',      icon: BookOpen },
 }
 

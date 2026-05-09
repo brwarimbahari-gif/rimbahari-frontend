@@ -8,7 +8,6 @@ const PUB_TYPES = [
   { value: 'EZINE_KEHATI',      label: 'E-zine Kehati'        },
   { value: 'EZINE_ETNOGRAFI',   label: 'Etnografi Multimedia' },
   { value: 'LAPORAN',           label: 'Laporan Program'      },
-  { value: 'OPINION_EDITORIAL', label: 'Opinion Editorial'    },
   { value: 'LAINNYA',           label: 'Lainnya'              },
 ]
 
