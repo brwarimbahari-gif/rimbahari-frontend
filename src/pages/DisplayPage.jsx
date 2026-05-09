@@ -13,7 +13,6 @@ export const CATEGORIES = [
   { id: 'EZINE_KEHATI',      label: 'E-zine Kehati',        headingAccent: 'Kehati',    icon: BookOpen },
   { id: 'EZINE_ETNOGRAFI',   label: 'Etnografi Multimedia', headingAccent: 'Etnografi', icon: Compass  },
   { id: 'LAPORAN',           label: 'Laporan Program',      headingAccent: 'Laporan',   icon: FileText },
-  { id: 'OPINION_EDITORIAL', label: 'Opinion Editorial',    headingAccent: 'Editorial', icon: Star     },
   { id: 'LAINNYA',           label: 'Lainnya',              headingAccent: 'Lainnya',   icon: BookOpen },
 ]
 
@@ -21,7 +20,6 @@ export const typeStyle = {
   EZINE_KEHATI:      { bg: 'bg-forest/10',  text: 'text-forest',  border: 'border-forest/20' },
   EZINE_ETNOGRAFI:   { bg: 'bg-moss/10',    text: 'text-moss',    border: 'border-moss/20'   },
   LAPORAN:           { bg: 'bg-clay/10',    text: 'text-clay',    border: 'border-clay/20'   },
-  OPINION_EDITORIAL: { bg: 'bg-sienna/10',  text: 'text-sienna',  border: 'border-sienna/20' },
   LAINNYA:           { bg: 'bg-sand',       text: 'text-ash',     border: 'border-sand'      },
 }
 
