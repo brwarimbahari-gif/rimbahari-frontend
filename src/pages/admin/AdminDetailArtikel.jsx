@@ -50,7 +50,10 @@ export default function AdminDetailArtikel() {
   })
 
   const [loading, setLoading] = useState(isEditMode)
+  const [parsing, setParsing] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [draftId, setDraftId] = useState(null)
+  const [parseError, setParseError] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [contributorSearch, setContributorSearch] = useState('')
@@ -111,8 +114,6 @@ export default function AdminDetailArtikel() {
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
-  const [parsing, setParsing] = useState(false)
-  const [parseError, setParseError] = useState('')
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -152,18 +153,13 @@ export default function AdminDetailArtikel() {
           content: art.content || prev.content
         }))
         
-        // Jika sedang mode EDIT, hapus draf sementara yang baru saja dibuat oleh API create
-        if (isEditMode) {
-          const tempId = art.id
-          if (tempId) {
-            // Jalankan di background
-            articlesApi.deleteArticle(tempId).catch(err => console.error('Gagal menghapus draf sementara:', err))
-          }
-        } else {
-          const newId = art.id
-          if (newId) {
-            navigate(`/4Dm1n_d4Shb04Rd/articles/${newId}/edit`, { replace: true })
-          }
+        // Selalu simpan ID sebagai draftId agar handleSubmit tahu untuk melakukan UPDATE, bukan CREATE ulang
+        setDraftId(art.id)
+        
+        // Jika sedang mode EDIT, kita juga ingin menghapus draf sementara jika ID-nya berbeda dari ID yang sedang diedit
+        if (isEditMode && art.id !== id) {
+          articlesApi.deleteArticle(art.id).catch(() => {})
+          setDraftId(null) // Jangan gunakan draftId jika kita sudah di mode EDIT (gunakan ID dari URL)
         }
       } else {
         setParseError(result.data?.detail || result.data?.error || 'Gagal menganalisis dokumen.')
@@ -214,8 +210,8 @@ export default function AdminDetailArtikel() {
     payload.append('abstract', formData.abstract)
     payload.append('content_type', formData.content_type)
     
-    // Hanya kirim field ini jika dalam mode EDIT, karena CREATE akan ditolak backend (Error 400)
-    if (isEditMode) {
+    // Hanya kirim field ini jika dalam mode EDIT atau sudah ada draftId (hasil parsing)
+    if (isEditMode || draftId) {
       payload.append('status', formData.status)
       payload.append('reviewer_note', formData.reviewer_note)
       payload.append('content', formData.content)
@@ -230,10 +226,17 @@ export default function AdminDetailArtikel() {
 
     try {
       let result
-      if (isEditMode) {
-        result = await articlesApi.update(id, payload)
+      const targetId = isEditMode ? id : draftId
+
+      if (targetId) {
+        result = await articlesApi.adminUpdate(targetId, payload)
         if (result.ok) {
-          setSuccess('Artikel berhasil diperbarui.')
+          if (!isEditMode) {
+            setNewlyCreatedId(targetId)
+            setShowSuccessModal(true)
+          } else {
+            setSuccess('Artikel berhasil diperbarui.')
+          }
         }
       } else {
         result = await articlesApi.create(payload)
@@ -255,6 +258,17 @@ export default function AdminDetailArtikel() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleCancel = async () => {
+    if (draftId && !isEditMode) {
+      try {
+        await articlesApi.deleteArticle(draftId)
+      } catch (err) {
+        console.error('Gagal menghapus draf yang dibatalkan:', err)
+      }
+    }
+    navigate('/4Dm1n_d4Shb04Rd/articles')
   }
 
   // ---------------------------------------------------------------------------
@@ -284,7 +298,7 @@ export default function AdminDetailArtikel() {
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-sand flex items-center justify-between px-10 z-10">
           <div className="flex items-center gap-4">
             <button 
-              onClick={() => navigate('/4Dm1n_d4Shb04Rd/articles')}
+              onClick={handleCancel}
               className="p-2 hover:bg-bone rounded-full transition-colors text-ash"
             >
               <ChevronLeft size={20} />
@@ -327,9 +341,30 @@ export default function AdminDetailArtikel() {
             )}
 
             {success && (
-              <div className="mb-8 p-4 bg-green-50 border border-green-100 rounded-lg flex items-center gap-3 text-forest animate-in fade-in slide-in-from-top-2">
-                <CheckCircle2 size={20} />
-                <p className="text-sm font-medium">{success}</p>
+              <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between gap-4 text-forest animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-forest/10 rounded-full">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">Berhasil!</p>
+                    <p className="text-xs opacity-80">{success}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => navigate('/4Dm1n_d4Shb04Rd/articles')}
+                    className="px-4 py-2 bg-white border border-green-200 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors"
+                  >
+                    Ke Manajemen
+                  </button>
+                  <button 
+                    onClick={() => setSuccess('')}
+                    className="px-4 py-2 bg-forest text-bone rounded-lg text-xs font-bold hover:bg-forest/90 transition-colors"
+                  >
+                    Tetap di Sini
+                  </button>
+                </div>
               </div>
             )}
 
@@ -380,7 +415,7 @@ export default function AdminDetailArtikel() {
                         </select>
                       </div>
 
-                      {isEditMode && (
+                      {(isEditMode || draftId) && (
                         <div className="space-y-2">
                           <label className="text-[10px] uppercase font-bold text-ash tracking-widest px-1">Status Publikasi</label>
                           <select 

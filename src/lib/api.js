@@ -196,6 +196,9 @@ export const articlesApi = {
     })
   },
 
+  adminUpdate: (id, formData) => _authFetch(`/api/articles/admin/${id}/`, { method: 'PATCH', body: formData }),
+  adminDelete: (id) => _authRequest(`/api/articles/admin/${id}/`, { method: 'DELETE' }),
+
   // Triggers PDF generation for a PUBLISHED article (fire-and-forget after publish)
   download: (id) => _authRequest(`/api/articles/${id}/download/`),
 
