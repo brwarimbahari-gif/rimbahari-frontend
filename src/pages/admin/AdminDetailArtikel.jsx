@@ -158,6 +158,11 @@ export default function AdminDetailArtikel() {
             // Jalankan di background
             articlesApi.deleteArticle(tempId).catch(err => console.error('Gagal menghapus draf sementara:', err))
           }
+        } else {
+          const newId = art.id
+          if (newId) {
+            navigate(`/4Dm1n_d4Shb04Rd/articles/${newId}/edit`, { replace: true })
+          }
         }
       } else {
         setParseError(result.data?.detail || result.data?.error || 'Gagal menganalisis dokumen.')
@@ -193,7 +198,10 @@ export default function AdminDetailArtikel() {
     setShowConfirmModal(true)
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault()
+    if (submitting) return
+
     setShowConfirmModal(false)
     setSubmitting(true)
     setError('')
@@ -714,6 +722,7 @@ export default function AdminDetailArtikel() {
         } : null}
         confirmText={isEditMode ? "Simpan Sekarang" : "Unggah"}
         variant="info"
+        loading={submitting}
       />
 
       {/* ── Success Modal ────────────────────────────────────────── */}

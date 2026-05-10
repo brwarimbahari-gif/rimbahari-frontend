@@ -10,7 +10,9 @@ export default function ConfirmationModal({
   confirmText = "Konfirmasi",
   cancelText = "Batalkan",
   variant = "danger", // danger | warning | info | success
-  details = null // { judul, penulis, tipe }
+  details = null, // { judul, penulis, tipe }
+  loading = false,
+  confirmDisabled = false
 }) {
   
   // Lock body scroll when modal is open
@@ -106,12 +108,19 @@ export default function ConfirmationModal({
             </button>
             <button
               onClick={onConfirm}
-              className={`flex-1 px-6 py-3 rounded-xl font-sans text-sm font-bold text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${theme.btn}`}
+              disabled={loading || confirmDisabled}
+              className={`flex-1 px-6 py-3 rounded-xl font-sans text-sm font-bold text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${theme.btn} disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100`}
             >
-              {variant === 'danger' && <Trash2 size={18} />}
-              {(variant === 'success' || variant === 'info') && <CheckCircle2 size={18} />}
-              {variant === 'warning' && <AlertCircle size={18} />}
-              {confirmText}
+              {loading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <>
+                  {variant === 'danger' && <Trash2 size={18} />}
+                  {(variant === 'success' || variant === 'info') && <CheckCircle2 size={18} />}
+                  {variant === 'warning' && <AlertCircle size={18} />}
+                </>
+              )}
+              {loading ? 'Memproses...' : confirmText}
             </button>
           </div>
         </div>

@@ -120,7 +120,10 @@ export default function AdminDetailEtalase() {
     }
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault()
+    if (saving) return
+
     setShowConfirmModal(false)
     setSaving(true)
     setUploadStep('INIT')
@@ -478,6 +481,7 @@ export default function AdminDetailEtalase() {
           'Tahun': formData.year
         } : null}
         confirmText={isEditMode ? "Simpan Sekarang" : "Unggah Sekarang"}
+        loading={saving}
       />
     </div>
   )
