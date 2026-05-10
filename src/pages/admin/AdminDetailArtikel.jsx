@@ -43,6 +43,9 @@ export default function AdminDetailArtikel() {
     reviewer_note: '',
     file: null,
     thumbnail_file: null,
+    current_file_url: '',
+    current_thumbnail_url: '',
+    author: null,
     contributor_ids: []
   })
 
@@ -75,6 +78,9 @@ export default function AdminDetailArtikel() {
             reviewer_note: data.reviewer_note || '',
             file: null,
             thumbnail_file: null,
+            current_file_url: data.original_file_url || '',
+            current_thumbnail_url: data.thumbnail_url || '',
+            author: data.author || null,
             contributor_ids: data.contributors?.map(c => c.user.id) || []
           })
           setSelectedContributors(data.contributors?.map(c => c.user) || [])
@@ -460,6 +466,18 @@ export default function AdminDetailArtikel() {
                         <p className="text-[10px] text-ash uppercase tracking-wider font-bold opacity-60">PDF / DOCX Wajib</p>
                       </div>
                     </div>
+                    {formData.current_file_url && !formData.file && (
+                      <div className="flex items-center gap-2">
+                        <a 
+                          href={formData.current_file_url} 
+                          download
+                          className="flex items-center gap-2 px-3 py-1.5 bg-forest/5 text-forest rounded-md text-[10px] font-bold hover:bg-forest/10 transition-colors"
+                        >
+                          <Save size={12} />
+                          Unduh
+                        </a>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="relative group cursor-pointer">
@@ -472,13 +490,13 @@ export default function AdminDetailArtikel() {
                     />
                     <div className="border-2 border-sand group-hover:border-forest rounded-lg p-10 flex flex-col items-center justify-center gap-4 transition-all bg-bone/10 group-hover:bg-forest/[0.02]">
                       <div className="w-16 h-16 rounded-full bg-bone/50 flex items-center justify-center text-ash group-hover:text-forest transition-colors">
-                        <Upload size={32} />
+                        {formData.file || formData.current_file_url ? <FileText size={32} className="text-forest" /> : <Upload size={32} />}
                       </div>
                       <div className="text-center">
                         <p className="text-sm font-bold text-ink mb-1">
-                          {formData.file ? formData.file.name : 'Pilih file dokumen artikel'}
+                          {formData.file ? formData.file.name : (formData.current_file_url ? 'Ganti dokumen saat ini' : 'Pilih file dokumen artikel')}
                         </p>
-                        <p className="text-xs text-ash">Tarik dan lepas file ke sini atau klik untuk memilih</p>
+                        <p className="text-xs text-ash mt-1">Tarik dan lepas file ke sini atau klik untuk memilih</p>
                       </div>
                     </div>
                   </div>
@@ -515,12 +533,24 @@ export default function AdminDetailArtikel() {
                   {isEditMode && (
                     <div className="pt-6 border-t border-sand/30">
                       <h4 className="text-[10px] uppercase font-bold text-ash tracking-widest mb-4">Informasi Sistem</h4>
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-4 bg-bone/30 rounded-lg border border-sand/50">
                           <span className="text-[8px] uppercase font-bold text-ash/60 block mb-1">ID Artikel</span>
                           <span className="text-xs font-mono text-ink font-bold break-all">{id}</span>
                         </div>
+                        {formData.author && (
+                          <div className="p-4 bg-bone/30 rounded-lg border border-sand/50 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center text-forest text-xs font-bold">
+                              {formData.author.full_name?.charAt(0)}
+                            </div>
+                            <div>
+                              <span className="text-[8px] uppercase font-bold text-ash/60 block mb-0.5">Penulis Utama</span>
+                              <span className="text-xs font-bold text-ink">{formData.author.full_name}</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
+                      <p className="text-[10px] text-ash/40 mt-4 italic">* Informasi peninjau (reviewer) saat ini belum tersedia di API dan memerlukan update pada backend serializers.</p>
                     </div>
                   )}
                 </section>
@@ -528,17 +558,36 @@ export default function AdminDetailArtikel() {
                 <div className="space-y-8">
                   {/* Thumbnail Section */}
                 <section className="bg-white rounded-lg border border-sand p-8 shadow-subtle space-y-4">
-                  <div className="flex items-center gap-3 pb-4">
-                    <div className="p-2 text-forest">
-                      <ImageIcon size={20} />
+                  <div className="flex items-center justify-between pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 text-forest">
+                        <ImageIcon size={20} />
+                      </div>
+                      <label className="text-[10px] uppercase font-bold text-ash tracking-widest">Thumbnail Cover</label>
                     </div>
-                    <label className="text-[10px] uppercase font-bold text-ash tracking-widest">Thumbnail Cover</label>
+                    {formData.current_thumbnail_url && !formData.thumbnail_file && (
+                      <a 
+                        href={formData.current_thumbnail_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-forest/5 text-forest rounded-md text-[10px] font-bold hover:bg-forest/10 transition-colors"
+                      >
+                        <Upload size={12} className="rotate-180" />
+                        Lihat
+                      </a>
+                    )}
                   </div>
                   <div className="relative aspect-video rounded-lg overflow-hidden bg-bone border border-sand flex items-center justify-center group">
                     {formData.thumbnail_file ? (
                       <img 
                         src={URL.createObjectURL(formData.thumbnail_file)} 
                         alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : formData.current_thumbnail_url ? (
+                      <img 
+                        src={formData.current_thumbnail_url} 
+                        alt="Current Thumbnail" 
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -653,7 +702,7 @@ export default function AdminDetailArtikel() {
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={handleSubmit}
-        title={isEditMode ? "Konfirmasi Perubahan" : "Konfirmasi Publikasi"}
+        title={isEditMode ? "Konfirmasi Perubahan" : "Konfirmasi Unggah"}
         message={isEditMode 
           ? "Apakah Anda yakin ingin menyimpan perubahan pada artikel ini? Pastikan data yang dimasukkan sudah sesuai."
           : "Apakah Anda yakin ingin menerbitkan artikel baru ini? Artikel akan langsung tersedia di sistem sesuai status yang dipilih."
@@ -663,7 +712,7 @@ export default function AdminDetailArtikel() {
           penulis: 'Admin',
           tipe: formData.content_type
         } : null}
-        confirmText={isEditMode ? "Simpan Sekarang" : "Terbitkan Sekarang"}
+        confirmText={isEditMode ? "Simpan Sekarang" : "Unggah"}
         variant="info"
       />
 
