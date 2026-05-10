@@ -68,10 +68,18 @@ export default function RegisterPage() {
   const handleGoogleLogin = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     const redirectUri = window.location.origin + window.location.pathname
+    
+    if (!clientId) {
+      const msg = 'Google Client ID tidak ditemukan. Pastikan VITE_GOOGLE_CLIENT_ID sudah diatur di Vercel dan lakukan Re-deploy.'
+      setServerError(msg)
+      alert(msg)
+      return
+    }
+
     const scope = encodeURIComponent('openid email profile')
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`
     
-    window.location.href = googleAuthUrl
+    window.location.assign(googleAuthUrl)
   }
 
   const update = (key, val) => {
