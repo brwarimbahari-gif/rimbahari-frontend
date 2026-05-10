@@ -3,7 +3,7 @@ import { LogOut, ChevronDown, Menu, X, ShieldCheck, ClipboardList, BookMarked, S
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { authApi, session } from '../lib/api'
 
-const ADMIN_URL = `${import.meta.env.VITE_API_URL}/4Dm1n_d4Shb04Rd/`
+const ADMIN_URL = '/4Dm1n_d4Shb04Rd/login'
 
 const navLinks = [
   { label: 'Beranda', href: '/home' },
@@ -222,9 +222,8 @@ export default function Navbar() {
                       {isAdmin && (
                         <>
                           <div className="h-px bg-sand my-1" />
-                          <a
-                            href={ADMIN_URL}
-                            target="_blank"
+                          <Link
+                            to={ADMIN_URL}
                             rel="noopener noreferrer"
                             onClick={() => setDropdownOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm text-ash
@@ -232,7 +231,7 @@ export default function Navbar() {
                           >
                             <ShieldCheck size={15} className="text-ash flex-shrink-0" />
                             Dashboard Admin
-                          </a>
+                          </Link>
                         </>
                       )}
                       <button
@@ -401,9 +400,8 @@ export default function Navbar() {
               Pengaturan
             </Link>
             {isAdmin && (
-              <a
-                href={ADMIN_URL}
-                target="_blank"
+              <Link
+                to={ADMIN_URL}
                 rel="noopener noreferrer"
                 onClick={closeMenu}
                 className="flex items-center gap-3 px-4 py-2.5 rounded-lg font-sans text-sm text-ash
@@ -411,7 +409,7 @@ export default function Navbar() {
               >
                 <ShieldCheck size={16} className="text-ash flex-shrink-0" />
                 Dashboard Admin
-              </a>
+              </Link>
             )}
             <button
               onClick={handleLogout}
