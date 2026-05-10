@@ -56,6 +56,15 @@ export default function LoginPage() {
   const handleGoogleLogin = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     const redirectUri = window.location.origin + '/login'
+    
+    console.log('Initiating Google Login:', { clientId, redirectUri })
+
+    if (!clientId) {
+      setError('Konfigurasi Google Client ID tidak ditemukan. Periksa file .env atau Vercel Environment Variables.')
+      console.error('VITE_GOOGLE_CLIENT_ID is missing!')
+      return
+    }
+
     const scope = encodeURIComponent('openid email profile')
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`
     
