@@ -232,7 +232,27 @@ export const etalaseApi = {
   detail: (id) => _authRequest(`/api/etalase/${id}/`),
   download: (id) => _authRequest(`/api/etalase/${id}/download/`),
 
-  // Admin-only (IsRIMBAHARIAdmin)
+  // --- GCP Signed URL Flow (New) ---
+  initiateUpload: (payload) => 
+    _authRequest('/api/etalase/initiate-upload/', { 
+      method: 'POST', 
+      body: JSON.stringify(payload) 
+    }),
+
+  uploadToGcs: (url, file, contentType) => 
+    fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': contentType },
+      body: file
+    }),
+
+  confirmUpload: (payload) => 
+    _authRequest('/api/etalase/confirm-upload/', { 
+      method: 'POST', 
+      body: JSON.stringify(payload) 
+    }),
+
+  // --- Legacy / Original Flow ---
   create: (formData) => _authFetch('/api/etalase/', { method: 'POST', body: formData }),
   update: (id, formData) => _authFetch(`/api/etalase/${id}/`, { method: 'PATCH', body: formData }),
   delete: (id) => _authRequest(`/api/etalase/${id}/`, { method: 'DELETE' }),

@@ -108,6 +108,7 @@ export default function DisplayUploadPage() {
   // ── State ─────────────────────────────────────────────────────────────
   const [loading, setLoading]     = useState(isEdit)
   const [submitting, setSubmitting] = useState(false)
+  const [uploadStep, setUploadStep] = useState('') // '', 'INIT', 'PDF', 'COVER', 'CONFIRM'
   const [fieldErrors, setFieldErrors] = useState({})
   const [serverError, setServerError] = useState('')
 
@@ -135,28 +136,57 @@ export default function DisplayUploadPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitting(true); setFieldErrors({}); setServerError('')
+    setSubmitting(true); setFieldErrors({}); setServerError(''); setUploadStep('INIT')
 
-    const fd = new FormData()
-    fd.append('title', title.trim())
-    fd.append('pub_type', pubType)
-    fd.append('year', year)
-    if (description.trim()) fd.append('description', description.trim())
-    if (pdfFile)   fd.append('pdf_file', pdfFile)
-    if (coverFile) fd.append('cover_file', coverFile)
+    try {
+      // 1. Initiate Upload
+      const initiateRes = await etalaseApi.initiateUpload({
+        pdf_content_type: pdfFile.type || 'application/pdf',
+        cover_content_type: coverFile ? (coverFile.type || 'image/jpeg') : null
+      })
 
-    const { ok, status, data } = isEdit
-      ? await etalaseApi.update(pubId, fd)
-      : await etalaseApi.create(fd)
+      if (!initiateRes.ok) {
+        throw new Error(initiateRes.data?.error || initiateRes.data?.detail || 'Gagal menginisiasi upload.')
+      }
 
-    if (ok) {
-      navigate('/display/manage')
-    } else if (status === 400 && data?.errors) {
-      setFieldErrors(data.errors)
-    } else {
-      setServerError(data?.error ?? data?.detail ?? 'Terjadi kesalahan. Coba lagi.')
+      const { publication_id, pdf_upload_url, cover_upload_url, pdf_path, cover_path } = initiateRes.data
+
+      // 2. Upload PDF
+      setUploadStep('PDF')
+      const pdfUploadRes = await etalaseApi.uploadToGcs(pdf_upload_url, pdfFile, pdfFile.type || 'application/pdf')
+      if (!pdfUploadRes.ok) throw new Error('Gagal mengunggah file PDF ke storage.')
+
+      // 3. Upload Cover (if any)
+      if (coverFile && cover_upload_url) {
+        setUploadStep('COVER')
+        const coverUploadRes = await etalaseApi.uploadToGcs(cover_upload_url, coverFile, coverFile.type || 'image/jpeg')
+        if (!coverUploadRes.ok) throw new Error('Gagal mengunggah file cover ke storage.')
+      }
+
+      // 4. Confirm Upload
+      setUploadStep('CONFIRM')
+      const confirmRes = await etalaseApi.confirmUpload({
+        publication_id,
+        title: title.trim(),
+        pub_type: pubType,
+        year: parseInt(year),
+        description: description.trim(),
+        pdf_path,
+        cover_path
+      })
+
+      if (confirmRes.ok) {
+        navigate('/display/manage')
+      } else {
+        throw new Error(confirmRes.data?.error || confirmRes.data?.detail || 'Gagal menyimpan publikasi ke database.')
+      }
+
+    } catch (err) {
+      setServerError(err.message)
+      setUploadStep('')
+    } finally {
+      setSubmitting(false)
     }
-    setSubmitting(false)
   }
 
   if (loading) {
@@ -333,7 +363,16 @@ export default function DisplayUploadPage() {
               <button type="submit" disabled={submitting || (!isEdit && !pdfFile) || !title.trim() || !pubType}
                 className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
                 {submitting
-                  ? <><Loader2 size={14} className="animate-spin" />{isEdit ? 'Menyimpan…' : 'Mengunggah…'}</>
+                  ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      {uploadStep === 'INIT' && 'Menyiapkan...'}
+                      {uploadStep === 'PDF' && 'Mengunggah PDF...'}
+                      {uploadStep === 'COVER' && 'Mengunggah Cover...'}
+                      {uploadStep === 'CONFIRM' && 'Menyimpan...'}
+                      {!uploadStep && (isEdit ? 'Menyimpan...' : 'Mengunggah...')}
+                    </>
+                  )
                   : <><CheckCircle2 size={14} />{isEdit ? 'Simpan Perubahan' : 'Unggah Publikasi'}</>
                 }
               </button>
