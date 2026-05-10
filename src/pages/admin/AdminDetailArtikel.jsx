@@ -128,7 +128,8 @@ export default function AdminDetailArtikel() {
     }
   }
 
-  const handleParse = async () => {
+  const handleParse = async (e) => {
+    if (e) e.preventDefault()
     if (!formData.file || parsing || submitting) return
     
     setParsing(true)
@@ -332,7 +333,13 @@ export default function AdminDetailArtikel() {
               </div>
             )}
 
-            <form className="space-y-8" onSubmit={handleSubmit}>
+            <form 
+              className="space-y-8" 
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!parsing && !submitting) handleSubmit(e)
+              }}
+            >
               
               {/* Primary Content Stack */}
               <div className="space-y-8">
@@ -514,8 +521,8 @@ export default function AdminDetailArtikel() {
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
-                        onClick={handleParse}
-                        disabled={parsing}
+                        onClick={(e) => handleParse(e)}
+                        disabled={parsing || submitting}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-sans text-xs font-bold border transition-all duration-300 ${
                           parsing 
                             ? 'bg-sand text-ash border-sand cursor-not-allowed'
