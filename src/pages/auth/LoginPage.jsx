@@ -20,8 +20,48 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
   const [emailNotVerified, setEmailNotVerified] = useState(false)
+
+  // ── Handle Google Callback ──────────────────────────────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+
+    if (code) {
+      handleGoogleCallback(code)
+    }
+  }, [])
+
+  const handleGoogleCallback = async (code) => {
+    setGoogleLoading(true)
+    setError('')
+    
+    // Hilangkan code dari URL agar bersih
+    window.history.replaceState({}, document.title, window.location.pathname)
+
+    const redirectUri = window.location.origin + '/login'
+    const { ok, data } = await authApi.googleAuth(code, redirectUri)
+
+    if (ok) {
+      session.save(data.tokens.access, data.tokens.refresh, data.user)
+      navigate(data.user.is_profile_complete ? '/home' : '/activate')
+    } else {
+      setError(data.error || 'Gagal masuk dengan Google. Coba lagi.')
+    }
+    setGoogleLoading(false)
+  }
+
+  const handleGoogleLogin = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    const redirectUri = window.location.origin + '/login'
+    const scope = encodeURIComponent('openid email profile')
+    
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`
+    
+    window.location.href = googleAuthUrl
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -225,13 +265,25 @@ export default function LoginPage() {
           {/* Google login */}
           <button
             type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading || googleLoading}
             className="w-full flex items-center justify-center gap-3 bg-bone border border-sand
               rounded-lg px-4 py-3 font-sans text-sm font-medium text-ink
               hover:bg-sand/50 hover:border-ash/40
-              transition-all duration-[240ms] active:scale-[0.98]"
+              transition-all duration-[240ms] active:scale-[0.98]
+              disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <GoogleIcon />
-            Masuk dengan Google
+            {googleLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-forest/30 border-t-forest rounded-full animate-spin" />
+                Menghubungkan…
+              </span>
+            ) : (
+              <>
+                <GoogleIcon />
+                Masuk dengan Google
+              </>
+            )}
           </button>
 
           {/* Register link */}

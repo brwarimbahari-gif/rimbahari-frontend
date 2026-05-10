@@ -112,6 +112,12 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ email, code, new_password, new_password_confirm }),
     }),
+
+  googleAuth: (code, redirect_uri) =>
+    _request('/api/auth/google/', {
+      method: 'POST',
+      body: JSON.stringify({ code, redirect_uri }),
+    }),
 }
 
 // ---------------------------------------------------------------------------
