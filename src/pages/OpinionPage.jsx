@@ -270,8 +270,8 @@ export default function OpinionPage() {
           <div className="flex gap-1 p-1 bg-sand/30 rounded-lg border border-sand w-fit mb-8">
             {[
               { key: 'queue',   label: 'Antrian',  icon: ClipboardList },
-              { key: 'history', label: 'Riwayat',  icon: History       },
-            ].map(({ key, label, icon: Icon }) => (
+              isAdmin && { key: 'history', label: 'Riwayat',  icon: History },
+            ].filter(Boolean).map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => handleTabChange(key)}
