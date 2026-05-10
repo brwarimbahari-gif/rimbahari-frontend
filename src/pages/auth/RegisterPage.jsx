@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Eye, EyeOff, ArrowLeft, Leaf, AlertCircle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi, session } from '../../lib/api'
@@ -68,8 +68,8 @@ export default function RegisterPage() {
   const handleGoogleLogin = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     const redirectUri = window.location.origin + window.location.pathname
-    const scope = encodeURIComponent('openid email profile')
     
+    const scope = encodeURIComponent('openid email profile')
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`
     
     window.location.href = googleAuthUrl
