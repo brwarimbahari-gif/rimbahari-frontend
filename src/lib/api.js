@@ -24,6 +24,7 @@ export const session = {
     localStorage.removeItem('rh_access')
     localStorage.removeItem('rh_refresh')
     localStorage.removeItem('rh_user')
+    localStorage.removeItem('rh_admin_verified')
   },
   getAccess: () => localStorage.getItem('rh_access'),
   getRefresh: () => localStorage.getItem('rh_refresh'),
@@ -192,6 +193,21 @@ export const articlesApi = {
   // Triggers PDF generation for a PUBLISHED article (fire-and-forget after publish)
   download: (id) => _authRequest(`/api/articles/${id}/download/`),
 
+  // Admin only — full article list with filtering
+  adminList: ({ status = '', author = '', contentType = '', q = '', page = 1, page_size = 20 } = {}) => {
+    const qs = new URLSearchParams()
+    if (status)      qs.append('status', status)
+    if (author)      qs.append('author', author)
+    if (contentType) qs.append('content_type', contentType)
+    if (q)           qs.append('q', q)
+    if (page)        qs.append('page', page)
+    if (page_size)   qs.append('page_size', page_size)
+    const query = qs.toString()
+    return _authRequest(`/api/articles/admin/${query ? `?${query}` : ''}`)
+  },
+
+  adminDelete: (id) => _authRequest(`/api/articles/admin/${id}/`, { method: 'DELETE' }),
+
   // Admin only — history with optional ?status= filter
   reviewHistory: (status = '') => {
     const qs = status ? `?status=${status}` : ''
@@ -204,10 +220,12 @@ export const articlesApi = {
 // ---------------------------------------------------------------------------
 
 export const etalaseApi = {
-  list: ({ pub_type = '', year = '' } = {}) => {
+  list: ({ pub_type = '', year = '', page = 1, page_size = 20 } = {}) => {
     const qs = new URLSearchParams()
-    if (pub_type) qs.append('pub_type', pub_type)
-    if (year)     qs.append('year', year)
+    if (pub_type)  qs.append('pub_type', pub_type)
+    if (year)      qs.append('year', year)
+    if (page)      qs.append('page', page)
+    if (page_size) qs.append('page_size', page_size)
     const q = qs.toString()
     return _authRequest(`/api/etalase/${q ? `?${q}` : ''}`)
   },
@@ -281,4 +299,34 @@ export const contributorApi = {
   },
 
   detail: (userId) => _authRequest(`/api/contributors/${userId}/`),
+}
+
+// ---------------------------------------------------------------------------
+// Admin User & Stats Management endpoints
+// ---------------------------------------------------------------------------
+
+export const usersApi = {
+  // Admin only
+  stats: () => _authRequest('/api/admin/stats/'),
+  
+  list: ({ search = '', role = '', page = 1, page_size = 20 } = {}) => {
+    const qs = new URLSearchParams()
+    if (search)    qs.append('search', search)
+    if (role)      qs.append('role', role)
+    if (page)      qs.append('page', page)
+    if (page_size) qs.append('page_size', page_size)
+    const query = qs.toString()
+    return _authRequest(`/api/admin/users/${query ? `?${query}` : ''}`)
+  },
+  
+  detail: (id) => _authRequest(`/api/admin/users/${id}/`),
+  
+  update: (id, data) => _authRequest(`/api/admin/users/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data)
+  }),
+  
+  delete: (id) => _authRequest(`/api/admin/users/${id}/`, { method: 'DELETE' }),
+  
+  activate: (id) => _authRequest(`/api/admin/users/${id}/activate/`, { method: 'POST' }),
 }

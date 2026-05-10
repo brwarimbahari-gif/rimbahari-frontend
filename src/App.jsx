@@ -22,6 +22,13 @@ import ArticleDetailPage from './pages/article/ArticleDetailPage'
 import ArticlePage from './pages/ArticlePage'
 import OpinionPage from './pages/OpinionPage'
 import VignettePage from './pages/VignettePage'
+import AdminLoginPage from './pages/admin/AdminLoginPage'
+import AdminPage from './pages/AdminPage'
+import AdminManajemenArtikel from './pages/admin/AdminManajemenArtikel'
+import AdminDetailArtikel from './pages/admin/AdminDetailArtikel'
+import AdminManajemenEtalase from './pages/admin/AdminManajemenEtalase'
+import AdminDetailEtalase from './pages/admin/AdminDetailEtalase'
+import AdminManajemenUser from './pages/admin/AdminManajemenUser'
 import SessionExpiredModal from './components/SessionExpiredModal'
 
 export default function App() {
@@ -54,6 +61,17 @@ export default function App() {
         <Route path="/review" element={<ArticlePage />} />
         <Route path="/review/opinion" element={<OpinionPage />} />
         <Route path="/review/vignette" element={<VignettePage />} />
+
+        {/* ── Admin System ────────────────────────────────────── */}
+        <Route path="/4Dm1n_d4Shb04Rd/" element={<AdminPage />} />
+        <Route path="/4Dm1n_d4Shb04Rd/login" element={<AdminLoginPage />} />
+        <Route path="/4Dm1n_d4Shb04Rd/articles" element={<AdminManajemenArtikel />} />
+        <Route path="/4Dm1n_d4Shb04Rd/articles/new" element={<AdminDetailArtikel />} />
+        <Route path="/4Dm1n_d4Shb04Rd/articles/:id/edit" element={<AdminDetailArtikel />} />
+        <Route path="/4Dm1n_d4Shb04Rd/display" element={<AdminManajemenEtalase />} />
+        <Route path="/4Dm1n_d4Shb04Rd/display/new" element={<AdminDetailEtalase />} />
+        <Route path="/4Dm1n_d4Shb04Rd/display/:id/edit" element={<AdminDetailEtalase />} />
+        <Route path="/4Dm1n_d4Shb04Rd/users" element={<AdminManajemenUser />} />
       </Routes>
     </BrowserRouter>
   )
