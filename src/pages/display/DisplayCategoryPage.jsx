@@ -4,10 +4,8 @@ import { ArrowLeft, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import { etalaseApi, session } from '../../lib/api'
-import { CATEGORIES, DisplayCard, CardSkeleton } from '../DisplayPage'
+import { CATEGORIES, DisplayCard, CardSkeleton, BATIK } from '../../components/DisplayPage/DisplayShared'
 import FlipbookViewer from '../../components/FlipbookViewer'
-
-const BATIK = `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23F5EFE3' fill-opacity='1'%3E%3Cpath d='M30 30l-8-8 8-8 8 8-8 8zm0-16l-8-8 8-8 8 8-8 8zm0 32l-8-8 8-8 8 8-8 8zM14 30l-8-8 8-8 8 8-8 8zm32 0l-8-8 8-8 8 8-8 8z'/%3E%3C/g%3E%3C/svg%3E")`
 
 export default function DisplayCategoryPage() {
   const { pubType } = useParams()
