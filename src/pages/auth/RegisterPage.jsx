@@ -70,9 +70,7 @@ export default function RegisterPage() {
     const redirectUri = window.location.origin + window.location.pathname
     
     if (!clientId) {
-      const msg = 'Google Client ID tidak ditemukan. Pastikan VITE_GOOGLE_CLIENT_ID sudah diatur di Vercel dan lakukan Re-deploy.'
-      setServerError(msg)
-      alert(msg)
+      setServerError('Konfigurasi Google Client ID tidak ditemukan. Periksa file .env atau Vercel Environment Variables.')
       return
     }
 

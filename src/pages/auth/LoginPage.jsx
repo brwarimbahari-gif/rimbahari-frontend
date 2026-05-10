@@ -16,7 +16,7 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const navigate = useNavigate()
-
+  
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
@@ -58,9 +58,7 @@ export default function LoginPage() {
     const redirectUri = window.location.origin + '/login'
     
     if (!clientId) {
-      const msg = 'Google Client ID tidak ditemukan. Pastikan VITE_GOOGLE_CLIENT_ID sudah diatur di Vercel dan lakukan Re-deploy.'
-      setError(msg)
-      alert(msg) // Visible alert for production debugging
+      setError('Konfigurasi Google Client ID tidak ditemukan. Periksa file .env atau Vercel Environment Variables.')
       return
     }
 
