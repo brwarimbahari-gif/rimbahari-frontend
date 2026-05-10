@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight, Settings, FolderOpen, ShieldCheck, ClipboardList, BookMarked } from 'lucide-react'
 import { profilesApi, session } from '../../lib/api'
 
-const ADMIN_URL = `${import.meta.env.VITE_API_URL}/4Dm1n_d4Shb04Rd/`
+const ADMIN_URL = '/4Dm1n_d4Shb04Rd/login'
 
 const roleLabels = {
   MAHASISWA:   'Mahasiswa',
@@ -152,16 +152,15 @@ export default function FeedProfileCard() {
             <Settings size={13} className="text-ash/50 group-hover:text-forest transition-colors duration-[240ms]" />
           </Link>
           {isAdmin && (
-            <a
-              href={ADMIN_URL}
-              target="_blank"
+            <Link
+              to={ADMIN_URL}
               rel="noopener noreferrer"
               className="flex items-center justify-between py-1.5 px-2 rounded-lg font-sans text-sm
                 text-ash hover:bg-sand/40 transition-all duration-[240ms] group"
             >
               Dashboard Admin
               <ShieldCheck size={13} className="text-ash/50 group-hover:text-ash transition-colors duration-[240ms]" />
-            </a>
+            </Link>
           )}
         </div>
       </div>
