@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { X, AlertCircle, Trash2, CheckCircle2 } from 'lucide-react'
+import { X, AlertCircle, Trash2, CheckCircle2, Loader2 } from 'lucide-react'
 
 export default function ConfirmationModal({ 
   isOpen, 

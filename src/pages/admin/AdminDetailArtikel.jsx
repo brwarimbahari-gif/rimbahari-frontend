@@ -129,7 +129,7 @@ export default function AdminDetailArtikel() {
   }
 
   const handleParse = async () => {
-    if (!formData.file || parsing) return
+    if (!formData.file || parsing || submitting) return
     
     setParsing(true)
     setParseError('')
@@ -195,6 +195,7 @@ export default function AdminDetailArtikel() {
 
   const handleSaveClick = (e) => {
     if (e) e.preventDefault()
+    if (submitting || parsing) return
     setShowConfirmModal(true)
   }
 
@@ -304,10 +305,10 @@ export default function AdminDetailArtikel() {
           <div className="flex items-center gap-3">
             <button 
               onClick={handleSaveClick}
-              disabled={submitting}
+              disabled={submitting || parsing}
               className="px-8 py-2.5 bg-forest text-bone rounded-md text-sm font-bold shadow-warm hover:bg-forest/90 transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              {submitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {submitting || parsing ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {isEditMode ? 'Simpan' : 'Unggah'}
             </button>
           </div>
