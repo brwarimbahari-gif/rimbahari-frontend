@@ -131,26 +131,24 @@ export default function AdminDetailEtalase() {
     setSuccess('')
 
     try {
-      if (isEditMode) {
-        // ── Edit Mode: Standard Multipart (Metadata & Cover only) ─────────────
-        const payload = new FormData()
-        payload.append('title', formData.title)
-        payload.append('pub_type', formData.pub_type)
-        payload.append('year', formData.year)
-        payload.append('description', formData.description)
-        if (formData.cover_file) payload.append('cover_file', formData.cover_file)
-        
-        const result = await etalaseApi.update(id, payload)
-        if (!result.ok) throw result
+      if (isEditMode && !formData.file) {
+        // CASE A: Metadata-only update (Standard PATCH)
+        const res = await etalaseApi.jsonUpdate(id, {
+          title: formData.title,
+          pub_type: formData.pub_type,
+          year: parseInt(formData.year),
+          description: formData.description
+        })
+        if (!res.ok) throw res
       } else {
-        // ── Create Mode: 4-Step GCP Handshake ────────────────────────────────
-        if (!formData.file) {
+        // CASE B: Create NEW or Edit with NEW FILE (GCP Flow)
+        if (!isEditMode && !formData.file) {
           throw { data: { detail: 'File PDF wajib dipilih.' } }
         }
 
         // Step 1: Initiate
         const initRes = await etalaseApi.initiateUpload({
-          pdf_content_type: formData.file.type,
+          pdf_content_type: formData.file?.type || 'application/pdf',
           cover_content_type: formData.cover_file?.type || null
         })
         if (!initRes.ok) throw initRes

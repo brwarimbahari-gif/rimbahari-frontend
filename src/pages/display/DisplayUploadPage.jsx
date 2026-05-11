@@ -141,47 +141,59 @@ export default function DisplayUploadPage() {
     setSubmitting(true); setFieldErrors({}); setServerError(''); setUploadStep('INIT')
 
     try {
-      // 1. Initiate Upload
-      const initiateRes = await etalaseApi.initiateUpload({
-        pdf_content_type: pdfFile.type || 'application/pdf',
-        cover_content_type: coverFile ? (coverFile.type || 'image/jpeg') : null
-      })
-
-      if (!initiateRes.ok) {
-        throw new Error(initiateRes.data?.error || initiateRes.data?.detail || 'Gagal menginisiasi upload.')
-      }
-
-      const { publication_id, pdf_upload_url, cover_upload_url, pdf_path, cover_path } = initiateRes.data
-
-      // 2. Upload PDF
-      setUploadStep('PDF')
-      const pdfUploadRes = await etalaseApi.uploadToGcs(pdf_upload_url, pdfFile, pdfFile.type || 'application/pdf')
-      if (!pdfUploadRes.ok) throw new Error('Gagal mengunggah file PDF ke storage.')
-
-      // 3. Upload Cover (if any)
-      if (coverFile && cover_upload_url) {
-        setUploadStep('COVER')
-        const coverUploadRes = await etalaseApi.uploadToGcs(cover_upload_url, coverFile, coverFile.type || 'image/jpeg')
-        if (!coverUploadRes.ok) throw new Error('Gagal mengunggah file cover ke storage.')
-      }
-
-      // 4. Confirm Upload
-      setUploadStep('CONFIRM')
-      const confirmRes = await etalaseApi.confirmUpload({
-        publication_id,
-        title: title.trim(),
-        pub_type: pubType,
-        year: parseInt(year),
-        description: description.trim(),
-        pdf_path,
-        cover_path
-      })
-
-      if (confirmRes.ok) {
-        navigate('/display/manage')
+      if (isEdit && !pdfFile) {
+        // CASE A: Metadata-only update
+        const res = await etalaseApi.jsonUpdate(pubId, {
+          title: title.trim(),
+          pub_type: pubType,
+          year: parseInt(year),
+          description: description.trim()
+        })
+        if (!res.ok) throw new Error(res.data?.error || res.data?.detail || 'Gagal memperbarui metadata.')
       } else {
-        throw new Error(confirmRes.data?.error || confirmRes.data?.detail || 'Gagal menyimpan publikasi ke database.')
+        // CASE B: Create NEW or Edit with NEW FILE
+        // 1. Initiate Upload
+        const initiateRes = await etalaseApi.initiateUpload({
+          pdf_content_type: pdfFile.type || 'application/pdf',
+          cover_content_type: coverFile ? (coverFile.type || 'image/jpeg') : null
+        })
+
+        if (!initiateRes.ok) {
+          throw new Error(initiateRes.data?.error || initiateRes.data?.detail || 'Gagal menginisiasi upload.')
+        }
+
+        const { publication_id, pdf_upload_url, cover_upload_url, pdf_path, cover_path } = initiateRes.data
+
+        // 2. Upload PDF
+        setUploadStep('PDF')
+        const pdfUploadRes = await etalaseApi.uploadToGcs(pdf_upload_url, pdfFile, pdfFile.type || 'application/pdf')
+        if (!pdfUploadRes.ok) throw new Error('Gagal mengunggah file PDF ke storage.')
+
+        // 3. Upload Cover (if any)
+        if (coverFile && cover_upload_url) {
+          setUploadStep('COVER')
+          const coverUploadRes = await etalaseApi.uploadToGcs(cover_upload_url, coverFile, coverFile.type || 'image/jpeg')
+          if (!coverUploadRes.ok) throw new Error('Gagal mengunggah file cover ke storage.')
+        }
+
+        // 4. Confirm Upload
+        setUploadStep('CONFIRM')
+        const confirmRes = await etalaseApi.confirmUpload({
+          publication_id,
+          title: title.trim(),
+          pub_type: pubType,
+          year: parseInt(year),
+          description: description.trim(),
+          pdf_path,
+          cover_path
+        })
+
+        if (!confirmRes.ok) {
+          throw new Error(confirmRes.data?.error || confirmRes.data?.detail || 'Gagal menyimpan publikasi ke database.')
+        }
       }
+
+      navigate('/display/manage')
 
     } catch (err) {
       setServerError(err.message)

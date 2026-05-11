@@ -264,6 +264,7 @@ export const etalaseApi = {
   // --- Legacy / Original Flow ---
   create: (formData) => _authFetch('/api/etalase/', { method: 'POST', body: formData }),
   update: (id, formData) => _authFetch(`/api/etalase/${id}/`, { method: 'PATCH', body: formData }),
+  jsonUpdate: (id, payload) => _authRequest(`/api/etalase/${id}/`, { method: 'PATCH', body: JSON.stringify(payload) }),
   delete: (id) => _authRequest(`/api/etalase/${id}/`, { method: 'DELETE' }),
 }
 
