@@ -9,42 +9,10 @@ jobs:
   trigger:
     runs-on: ubuntu-latest
     steps:
-      - name: Cek apakah fork perlu sync
-        id: check
-        run: |
-          FORK_COMMIT=$(curl -s \
-            -H "Authorization: token ${{ secrets.SYNC_TOKEN }}" \
-            https://api.github.com/repos/brwarimbahari-gif/rimbahari-frontend/commits/main \
-            | jq -r '.sha')
-
-          UPSTREAM_COMMIT=${{ github.sha }}
-
-          echo "Fork commit   : ${FORK_COMMIT:0:7}"
-          echo "Upstream commit: ${UPSTREAM_COMMIT:0:7}"
-
-          if [ "$FORK_COMMIT" != "$UPSTREAM_COMMIT" ]; then
-            echo "needs_sync=true" >> $GITHUB_OUTPUT
-          else
-            echo "needs_sync=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Trigger sync di fork
-        if: steps.check.outputs.needs_sync == 'true'
+      - name: Trigger sync di fork anitakny
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.SYNC_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/brwarimbahari-gif/rimbahari-frontend/dispatches \
-            -d '{
-              "event_type": "upstream-updated",
-              "client_payload": {
-                "branch": "main",
-                "commit": "${{ github.sha }}",
-                "message": "${{ github.event.head_commit.message }}"
-              }
-            }'
-          echo "Trigger terkirim ke brwarimbahari-gif/rimbahari-frontend"
-
-      - name: Skip trigger
-        if: steps.check.outputs.needs_sync == 'false'
-        run: echo "Fork sudah up-to-date, skip trigger"
+            https://api.github.com/repos/anitakny/rimbara-frontend-react/actions/workflows/sync.yml/dispatches \
+            -d '{"ref":"main"}'
