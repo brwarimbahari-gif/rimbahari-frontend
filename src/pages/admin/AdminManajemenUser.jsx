@@ -28,6 +28,7 @@ import EditUserModal from '../../components/AdminPage/EditUserModal'
 
 export default function AdminManajemenUser() {
   const navigate = useNavigate()
+  const currentUser = session.getUser()
 
   // ---------------------------------------------------------------------------
   // State
@@ -283,8 +284,9 @@ export default function AdminManajemenUser() {
             </div>
 
             {/* Table Area */}
-            <div className="bg-white rounded-lg border border-sand shadow-subtle overflow-hidden min-h-[400px] flex flex-col">
-              {loading ? (
+            <div className="bg-white rounded-lg border border-sand shadow-subtle flex flex-col overflow-hidden min-h-[400px]">
+              <div className="overflow-x-auto">
+                {loading ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-20 text-ash">
                   <Loader2 size={40} className="animate-spin mb-4 text-forest opacity-20" />
                   <p className="text-sm font-medium animate-pulse">Memuat data pengguna...</p>
@@ -370,35 +372,42 @@ export default function AdminManajemenUser() {
                         {visibleColumns.bergabung && (
                           <td className={`py-4 px-6 text-[10px] font-medium ${user.is_active ? 'text-ash/70' : 'text-ash/30'}`}>{formatDate(user.date_joined)}</td>
                         )}
-                        <td className="py-4 px-8 text-right">
+                        <td className="py-4 px-8 text-right whitespace-nowrap min-w-[120px]">
                           <div className="flex items-center justify-end gap-1">
-                            <button 
-                              onClick={() => {
-                                setUserToEdit(user)
-                                setShowEditModal(true)
-                              }}
-                              className="p-2.5 text-ash hover:text-forest hover:bg-forest/5 rounded-xl transition-all" 
-                              title="Edit Role"
-                            >
-                              <Edit3 size={18} />
-                            </button>
+                            {/* Prevent self-edit for role and deactivation */}
+                            {user.id !== currentUser?.id ? (
+                              <>
+                                <button 
+                                  onClick={() => {
+                                    setUserToEdit(user)
+                                    setShowEditModal(true)
+                                  }}
+                                  className="p-2.5 text-ash hover:text-forest hover:bg-forest/5 rounded-xl transition-all" 
+                                  title="Edit Role"
+                                >
+                                  <Edit3 size={18} />
+                                </button>
 
-                            {user.is_active ? (
-                              <button 
-                                onClick={() => openDeleteModal(user)}
-                                className="p-2.5 text-ash hover:text-red-600 hover:bg-red-50 rounded-xl transition-all" 
-                                title="Nonaktifkan Akun"
-                              >
-                                <EyeOff size={18} />
-                              </button>
+                                {user.is_active ? (
+                                  <button 
+                                    onClick={() => openDeleteModal(user)}
+                                    className="p-2.5 text-ash hover:text-red-600 hover:bg-red-50 rounded-xl transition-all" 
+                                    title="Nonaktifkan Akun"
+                                  >
+                                    <EyeOff size={18} />
+                                  </button>
+                                ) : (
+                                  <button 
+                                    onClick={() => openDeleteModal(user)}
+                                    className="p-2.5 text-forest hover:bg-forest/5 rounded-xl transition-all" 
+                                    title="Aktifkan Kembali"
+                                  >
+                                    <UserCheck size={18} />
+                                  </button>
+                                )}
+                              </>
                             ) : (
-                              <button 
-                                onClick={() => openDeleteModal(user)}
-                                className="p-2.5 text-forest hover:bg-forest/5 rounded-xl transition-all" 
-                                title="Aktifkan Kembali"
-                              >
-                                <UserCheck size={18} />
-                              </button>
+                              <span className="text-[10px] font-bold text-ash/30 uppercase tracking-widest mr-2">Akun Anda</span>
                             )}
                           </div>
                         </td>
@@ -407,6 +416,7 @@ export default function AdminManajemenUser() {
                   </tbody>
                 </table>
               )}
+              </div>
             </div>
           </div>
         </div>
